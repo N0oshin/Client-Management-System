@@ -23,7 +23,7 @@ exports.register = async (req, res) => {
             return res.status(400).json({ msg: 'User already exists with this email.' });
         }
 
-        //  Determine Role ID (Defaulting to 'Sales Rep' if not specified)
+        //  Determine Role ID
         const roleResult = await pool.query('SELECT id, name FROM roles WHERE name = $1', [role_name]);
         if (roleResult.rowCount === 0) {
             return res.status(400).json({ msg: `Role "${role_name}" not found.` });
@@ -60,7 +60,6 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Find the user by email, joining the roles table
         const result = await pool.query(
             `SELECT u.id, u.email, u.password_hash, u.role_id, r.name AS role_name 
              FROM users u

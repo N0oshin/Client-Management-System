@@ -7,7 +7,6 @@ exports.createProduct = async (req, res) => {
         return res.status(400).json({ msg: 'Name and price are required fields.' });
     }
     
-    // Ensure price is a valid number before inserting
     if (isNaN(parseFloat(price))) {
         return res.status(400).json({ msg: 'Price must be a valid number.' });
     }

@@ -3,7 +3,6 @@ const router = express.Router();
 const clientController = require('../controllers/clientController');
 const { authenticateToken, authorizePermission } = require('../middleware/authMiddleware');
 
-// Define routes using the controller functions
 router.route('/')
     .post(
         authenticateToken,                 

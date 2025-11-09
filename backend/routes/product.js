@@ -16,7 +16,7 @@ router.route('/')
         productController.getProducts
     );
 
-// READ ONE (GET), UPDATE (PUT), DELETE (DELETE) by ID
+
 router.route('/:id')
     .get(
         authenticateToken,

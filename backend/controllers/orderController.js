@@ -1,16 +1,15 @@
 const { pool } = require('../config/db');
 
-//CREATE Order
+// CREATE Order 
 exports.createOrder = async (req, res) => {
 
-    const { client_id, items, payments } = req.body;        //  Destructure Request Body
+    const { client_id, items, payments } = req.body;
     const user_id = req.user.id; 
     
     if (!client_id || !items || items.length === 0 || !payments || payments.length === 0) {
         return res.status(400).json({ msg: 'Order requires a client, items, and payment details.' });
     }
 
-    // Initialize transaction client
     const client = await pool.connect();
 
     try {
@@ -19,9 +18,7 @@ exports.createOrder = async (req, res) => {
         let calculatedTotal = 0;
         let paidTotal = 0;
 
-        //CALCULATE TOTAL & VALIDATE ITEMS
         for (const item of items) {
-            // Find the current price of the product
             const productResult = await client.query('SELECT price FROM products WHERE id = $1', [item.product_id]);
             if (productResult.rowCount === 0) {
                 throw new Error(`Product ID ${item.product_id} not found.`);
@@ -38,7 +35,6 @@ exports.createOrder = async (req, res) => {
         }
 
         // FINANCIAL INTEGRITY CHECK 
-        // Compare calculated item total with the total amount paid across all methods.
         if (Math.abs(calculatedTotal - paidTotal) > 0.01) {
             throw new Error(`Financial mismatch: Order total is $${calculatedTotal.toFixed(2)}, but paid amount is $${paidTotal.toFixed(2)}.`);
         }
@@ -66,7 +62,7 @@ exports.createOrder = async (req, res) => {
             );
         }
 
-        await client.query('COMMIT'); // Commit transctn
+        await client.query('COMMIT'); 
         
         res.status(201).json({
             msg: 'Order created successfully and processed',
@@ -84,6 +80,49 @@ exports.createOrder = async (req, res) => {
     }
 };
 
+
+// READ All Orders
+exports.getOrders = async (req, res) => {
+    try {
+        const result = await pool.query(
+            `
+            SELECT 
+                o.id, 
+                o.total_amount, 
+                o.status, 
+                o.created_at, 
+                c.name AS client_name, 
+                u.name AS user_name,
+                
+                -- CRITICAL FIX: Aggregate the order items into a single JSON array
+                (
+                    SELECT json_agg(
+                        json_build_object(
+                            'product_name', p.name,
+                            'quantity', oi.quantity,
+                            'unit_price', oi.unit_price
+                        )
+                    )
+                    FROM order_items oi
+                    JOIN products p ON oi.product_id = p.id
+                    WHERE oi.order_id = o.id
+                ) AS order_items_summary
+                
+            FROM orders o
+            JOIN clients c ON o.client_id = c.id
+            JOIN users u ON o.user_id = u.id
+            ORDER BY o.created_at DESC
+            `
+        );
+        res.status(200).json({
+            count: result.rowCount,
+            orders: result.rows
+        });
+    } catch (err) {
+        console.error("Database error in getOrders:", err.message);
+        res.status(500).json({ msg: 'Server error retrieving orders.' });
+    }
+};
 
 // READ Single Order by ID 
 exports.getOrderById = async (req, res) => {
@@ -121,25 +160,5 @@ exports.getOrderById = async (req, res) => {
     } catch (err) {
         console.error("Database error in getOrderById:", err.message);
         res.status(500).json({ msg: 'Server error retrieving order details.' });
-    }
-};
-
-//READ All Orders 
-exports.getOrders = async (req, res) => {
-    try {
-        const result = await pool.query(
-            `SELECT o.id, o.total_amount, o.status, o.created_at, c.name AS client_name, u.name AS user_name
-             FROM orders o
-             JOIN clients c ON o.client_id = c.id
-             JOIN users u ON o.user_id = u.id
-             ORDER BY o.created_at DESC`
-        );
-        res.status(200).json({
-            count: result.rowCount,
-            orders: result.rows
-        });
-    } catch (err) {
-        console.error("Database error in getOrders:", err.message);
-        res.status(500).json({ msg: 'Server error retrieving orders.' });
     }
 };

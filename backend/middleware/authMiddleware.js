@@ -17,7 +17,6 @@ exports.authenticateToken = (req, res, next) => {
         const decoded = jwt.verify(token, JWT_SECRET);
         
         // Attach decoded user info (id, role_id, role_name) to the request
-        // This makes the user's details available to subsequent middleware/controllers
         req.user = decoded; 
         
         next(); 
@@ -26,7 +25,6 @@ exports.authenticateToken = (req, res, next) => {
     }
 };
 
-//  Middleware for Fine Grained Authorization 
 exports.authorizePermission = (requiredPermissions) => {
     return async (req, res, next) => {
         //  Check if user is authenticated 
@@ -52,7 +50,7 @@ exports.authorizePermission = (requiredPermissions) => {
             // Map the results to a simple array of permission codes
             const userPermissions = result.rows.map(row => row.code);
 
-            // Check if the user has AT LEAST ONE of the required permissions
+            // Check if the user has the required permissions
             const hasPermission = requiredPermissions.some(perm => 
                 userPermissions.includes(perm)
             );

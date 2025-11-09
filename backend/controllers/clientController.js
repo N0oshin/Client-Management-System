@@ -1,6 +1,6 @@
-const { pool } = require('../config/db'); // Import the PostgreSQL pool
+const { pool } = require('../config/db'); 
 
-// --- C: CREATE Client ---
+//CREATE Client 
 exports.createClient = async (req, res) => {
     const { name, email, phone } = req.body; 
 
@@ -27,7 +27,7 @@ exports.createClient = async (req, res) => {
 };
 
 
-// --- R: READ All Clients ---
+// READ All Clients 
 exports.getClients = async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM clients ORDER BY created_at DESC');
@@ -41,7 +41,7 @@ exports.getClients = async (req, res) => {
     }
 };
 
-// --- R: READ Single Client by ID ---
+// READ Single Client by ID
 exports.getClientById = async (req, res) => {
     const { id } = req.params;
 
@@ -59,14 +59,13 @@ exports.getClientById = async (req, res) => {
     }
 };
 
-// --- U: UPDATE Client ---
+// UPDATE Client 
 exports.updateClient = async (req, res) => {
     const { id } = req.params;
-    // Ensure all required fields are destructured. is_active is now included.
+    // all required fields are destructured
     const { name, email, phone, is_active } = req.body; 
     
     try {
-        // The SQL query already uses is_active:
         const result = await pool.query(
             'UPDATE clients SET name = $1, email = $2, phone = $3, is_active = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *',
             [name, email, phone, is_active, id] 
@@ -81,14 +80,13 @@ exports.updateClient = async (req, res) => {
             client: result.rows[0]
         });
     } catch (err) {
-        // ... (error handling)
-        console.error("Database error in updateClient:", err.message); // Should now show the correct error
+        console.error("Database error in updateClient:", err.message); 
         res.status(500).json({ msg: 'Server error during client update.' });
     }
 };
 
 
-// --- D: DELETE Client ---
+// DELETE Client 
 exports.deleteClient = async (req, res) => {
     const { id } = req.params;
 

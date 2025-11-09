@@ -3,7 +3,7 @@ const router = express.Router();
 const commentController = require('../controllers/commentController');
 const { authenticateToken, authorizePermission } = require('../middleware/authMiddleware');
 
-// CREATE (POST) and READ ALL (GET)
+
 router.route('/')
     .post(
         authenticateToken,
@@ -16,7 +16,7 @@ router.route('/')
         commentController.getComments
     );
 
-// READ ONE (GET), UPDATE (PUT), DELETE (DELETE) by ID
+
 router.route('/:id')
     .get(
         authenticateToken,
