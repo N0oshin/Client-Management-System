@@ -15,7 +15,7 @@ At its core, it implements granular authorization control, ensuring every user a
 | **Core Feature** | Advanced RBAC / Authorization(Permission checks on every API route) |   
 | **Orders** | Transactional Dual-Payment System | 
 | **Data Entities** | Clients, Products, Comments (Full CRUD for all entities)|
-| **Technology** | Full-Stack, RESTful API  (React + Node.js + PostgreSQL) , + Context API for State Management (Alternative to redux)|
+| **Technology** | Full-Stack, RESTful API  (React + Node.js + PostgreSQL) |
 
 
 -----
@@ -25,7 +25,7 @@ At its core, it implements granular authorization control, ensuring every user a
 
 | Component | Technology | 
 |------------|-------------|
-| **Frontend** | React.js  (State managed via Context API (useReducer) instead of Redux. UI styled with React-Bootstrap.) |
+| **Frontend** | React.js  |
 | **Backend** | Node.js / Express|
 | **Database** | PostgreSQL  |
 | **Security** | JWT / bcrypt |
